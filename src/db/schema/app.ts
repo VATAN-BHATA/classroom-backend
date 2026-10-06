@@ -29,7 +29,7 @@ export const departmentRelations = relations('departments', ({ many }) => ({subj
 export const subjectsRelations = relations('subjects', ({ one, many }) => ({
   department : one(departments, {
     fields: [subjects.departmentId],
-      references:[departments.Id]
+      references:[departments.id]
     })
 }));
 
@@ -38,6 +38,5 @@ export type NewDepartment = typeof departments.$inferInsert;
 
 export type Subject = typeof subjects.$inferSelect;
 export type NewSubject = typeof subjects.$inferInsert;
-
 
 
