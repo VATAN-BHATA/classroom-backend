@@ -1,2 +1,7 @@
-export { default as app } from './app.js';
-export { default as subjectRoutes } from './routes/subject.js';
+import app from './app.js';
+
+const port = Number(process.env.PORT ?? 8080);
+
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server listening on port ${port}`);
+});
