@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
-import { index } from './db/index.js';
-import { demoUsers } from './db/schema/index.js';
+import { db } from './db/index.js';
+import { departments } from './db/schema/index.js';
 
 async function main() {
   let createdUserId: number | undefined;
@@ -8,40 +8,41 @@ async function main() {
   try {
     console.log('Performing CRUD operations...');
 
-    const [newUser] = await index
-      .insert(demoUsers)
+    const [newDepartment] = await db
+      .insert(departments)
       .values({
-        name: 'Admin User',
-        email: `admin-${Date.now()}@example.com`,
+        code: `EXAMPLE-${Date.now()}`,
+        name: 'Example Department',
+        description: 'Temporary record created by the CRUD example',
       })
       .returning();
 
-    if (!newUser) {
-      throw new Error('Failed to create user');
+    if (!newDepartment) {
+      throw new Error('Failed to create department');
     }
-    createdUserId = newUser.id;
-    console.log('CREATE:', newUser);
+    createdUserId = newDepartment.id;
+    console.log('CREATE:', newDepartment);
 
-    const [foundUser] = await index
+    const [foundDepartment] = await db
       .select()
-      .from(demoUsers)
-      .where(eq(demoUsers.id, newUser.id));
-    console.log('READ:', foundUser);
+      .from(departments)
+      .where(eq(departments.id, newDepartment.id));
+    console.log('READ:', foundDepartment);
 
-    const [updatedUser] = await index
-      .update(demoUsers)
-      .set({ name: 'Super Admin' })
-      .where(eq(demoUsers.id, newUser.id))
+    const [updatedDepartment] = await db
+      .update(departments)
+      .set({ name: 'Updated Example Department' })
+      .where(eq(departments.id, newDepartment.id))
       .returning();
 
-    if (!updatedUser) {
-      throw new Error('Failed to update user');
+    if (!updatedDepartment) {
+      throw new Error('Failed to update department');
     }
-    console.log('UPDATE:', updatedUser);
+    console.log('UPDATE:', updatedDepartment);
 
-    await index.delete(demoUsers).where(eq(demoUsers.id, newUser.id));
+    await db.delete(departments).where(eq(departments.id, newDepartment.id));
     createdUserId = undefined;
-    console.log('DELETE: User deleted.');
+    console.log('DELETE: Department deleted.');
     console.log('CRUD operations completed successfully.');
   } catch (error) {
     console.error('Error performing CRUD operations:', error);
@@ -49,7 +50,7 @@ async function main() {
   } finally {
     if (createdUserId !== undefined) {
       try {
-        await index.delete(demoUsers).where(eq(demoUsers.id, createdUserId));
+        await db.delete(departments).where(eq(departments.id, createdUserId));
       } catch (error) {
         console.error('Failed to clean up the example user:', error);
         process.exitCode = 1;
