@@ -1,5 +1,7 @@
 import cors from 'cors';
 import express from 'express';
+import { toNodeHandler } from 'better-auth/node';
+import { auth } from './lib/auth.js';
 import subjectRoutes from './routes/subject.js';
 
 const app = express();
@@ -26,6 +28,7 @@ app.use(
     credentials: true,
   }),
 );
+app.all('/api/auth/*path', toNodeHandler(auth));
 app.use(express.json());
 app.use('/api/subjects', subjectRoutes);
 
