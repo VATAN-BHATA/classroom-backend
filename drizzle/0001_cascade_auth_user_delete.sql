@@ -48,5 +48,39 @@ BEGIN
       updated_definition
     );
   END LOOP;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint AS constraint_row
+    JOIN pg_attribute AS user_id_column
+      ON user_id_column.attrelid = constraint_row.conrelid
+     AND user_id_column.attname = 'user_id'
+     AND NOT user_id_column.attisdropped
+    WHERE constraint_row.contype = 'f'
+      AND constraint_row.conrelid = to_regclass('"account"')
+      AND constraint_row.confrelid = to_regclass('"user"')
+      AND constraint_row.conkey = ARRAY[user_id_column.attnum]::smallint[]
+  ) THEN
+    ALTER TABLE "account"
+      ADD CONSTRAINT "account_user_id_user_id_fk"
+      FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint AS constraint_row
+    JOIN pg_attribute AS user_id_column
+      ON user_id_column.attrelid = constraint_row.conrelid
+     AND user_id_column.attname = 'user_id'
+     AND NOT user_id_column.attisdropped
+    WHERE constraint_row.contype = 'f'
+      AND constraint_row.conrelid = to_regclass('"session"')
+      AND constraint_row.confrelid = to_regclass('"user"')
+      AND constraint_row.conkey = ARRAY[user_id_column.attnum]::smallint[]
+  ) THEN
+    ALTER TABLE "session"
+      ADD CONSTRAINT "session_user_id_user_id_fk"
+      FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;
+  END IF;
 END;
 $migration$;
